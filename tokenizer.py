@@ -1,5 +1,6 @@
 import os
 import re
+import tiktoken
 
 from utils import PETRAIN_DATA_FOLDER
 
@@ -44,11 +45,7 @@ class SimpleTokenizer(Tokenizer):
         text = re.sub(r'\s+([,.?!"()\'])', r'\1', text)
         return text
 
-
-
-# main
-if __name__ == '__main__':
-    
+def main1():
     FILE_PATH = os.path.join(PETRAIN_DATA_FOLDER, "the-verdict.txt")
 
     with open(FILE_PATH, "r") as f:
@@ -61,4 +58,19 @@ if __name__ == '__main__':
     print(text)
     print(tokenizer.encode(text))
     print(tokenizer.decode(tokenizer.encode(text)))
+
+def main2():
+    tokenizer = tiktoken.get_encoding('gpt2')
+
+    text = "Veuillez résumer le texte suivant en quelques phrases en mettant en évidence les points les plus importants."
+    integers = tokenizer.encode(text)
+    print(integers, len(integers))
+    for i in integers:
+        print("token: ", tokenizer.decode([i]))
+    print(tokenizer.decode(integers))
     
+
+# main
+if __name__ == '__main__':
+    #main1()
+    main2()
