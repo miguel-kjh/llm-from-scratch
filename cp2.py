@@ -3,6 +3,7 @@ import re
 import tiktoken
 
 from utils import PETRAIN_DATA_FOLDER
+from data_prepare.GPTDataset import create_dataloader
 
 class Tokenizer:
 
@@ -70,7 +71,49 @@ def main2():
     print(tokenizer.decode(integers))
     
 
+def main3():
+    FILE_PATH = os.path.join(PETRAIN_DATA_FOLDER, "the-verdict.txt")
+
+    with open(FILE_PATH, "r") as f:
+        raw_text = f.read()
+
+    tokenizer = tiktoken.get_encoding('gpt2')
+    enc_text = tokenizer.encode(raw_text)
+    print(len(enc_text))
+    enc_sample = enc_text[50:]
+    context_size = 4 # determna cuanto token se va a considerar en el contexto (X)
+    x = enc_sample[:context_size]
+    y = enc_sample[1:context_size+1]
+    print(f"x: {x}")
+    print(f"y:     {y}")
+
+    for i in range(1, context_size+1):
+        context = enc_sample[:i]
+        desired = enc_sample[i]
+        print(context, "---->", desired)
+
+def main4():
+    FILE_PATH = os.path.join(PETRAIN_DATA_FOLDER, "the-verdict.txt")
+
+    with open(FILE_PATH, "r") as f:
+        raw_text = f.read()
+
+    dataloader = create_dataloader(
+        raw_text, 
+        max_length=4, 
+        stride=4, 
+        batch_size=8, 
+        shuffle=False
+    )
+    data_iter = iter(dataloader)
+    inputs, targets = next(data_iter)
+    print("Inputs:\n", inputs)
+    print("\nTargets:\n", targets)
+    
+
 # main
 if __name__ == '__main__':
     #main1()
-    main2()
+    #main2()
+    #main3()
+    main4()
