@@ -1,6 +1,7 @@
 import os
 import re
 import tiktoken
+import torch
 
 from utils import PETRAIN_DATA_FOLDER
 from data_prepare.GPTDataset import create_dataloader
@@ -109,6 +110,57 @@ def main4():
     inputs, targets = next(data_iter)
     print("Inputs:\n", inputs)
     print("\nTargets:\n", targets)
+
+def embeddings():
+    input_ids = torch.tensor([0])
+    vocab_size = 6
+    embedding_dim = 3
+    torch.manual_seed(0)
+    embedding_layer = torch.nn.Embedding(vocab_size, embedding_dim)
+    print(embedding_layer.weight)
+    print(embedding_layer(input_ids))
+
+    import numpy as np
+    matriz = np.array([[1, 2, 3],
+                   [4, 5, 6],
+                   [7, 8, 9]])
+
+    # Matriz de máscara (vector columna para seleccionar la segunda fila)
+    mascara = np.array([[0],  # No selecciona la primera fila
+                        [1],  # Selecciona la segunda fila
+                        [0]])  # No selecciona la tercera fila
+
+    # Multiplicación matricial para obtener la fila seleccionada
+    resultado = np.dot(mascara.T, matriz)
+    print(resultado)
+
+def positions():
+    FILE_PATH = os.path.join(PETRAIN_DATA_FOLDER, "the-verdict.txt")
+
+    with open(FILE_PATH, "r") as f:
+        raw_text = f.read()
+
+    vocab_size = 50257
+    output_dim = 256
+    token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
+    max_length = 4
+    dataloader = create_dataloader(
+        raw_text, batch_size=8, max_length=max_length,
+        stride=max_length, shuffle=False
+    )
+    data_iter = iter(dataloader)
+    inputs, targets = next(data_iter)
+    print("Token IDs:\n", inputs)
+    print("\nInputs shape:\n", inputs.shape)
+    token_embeddings = token_embedding_layer(inputs)
+    print("\nToken embeddings shape:\n", token_embeddings.shape)
+    context_length = max_length
+    pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
+    pos_embeddings = pos_embedding_layer(torch.arange(context_length))
+    print(pos_embeddings.shape)
+    input_embeddings = token_embeddings + pos_embeddings
+    print(input_embeddings.shape)
+
     
 
 # main
@@ -116,4 +168,6 @@ if __name__ == '__main__':
     #main1()
     #main2()
     #main3()
-    main4()
+    #main4()
+    #embeddings()
+    positions()
